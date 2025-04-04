@@ -1,6 +1,6 @@
 import unittest
-from Modelo.producto import Producto
-from Modelo.control_plagas import ControlPlagas
+from ..Modelo.producto import Producto
+from ..Modelo.control_plagas import ControlPlagas
 
 class TestProducto(unittest.TestCase):
     def test_crear_producto(self):
