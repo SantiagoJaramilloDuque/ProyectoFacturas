@@ -1,6 +1,5 @@
 from Modelo.cliente import Cliente
 from Modelo.factura import Factura
-from Modelo.producto import Producto
 from Modelo.control_plagas import ControlPlagas
 from Modelo.control_fertilizantes import ControlFertilizantes
 from Modelo.antibiotico import Antibiotico
