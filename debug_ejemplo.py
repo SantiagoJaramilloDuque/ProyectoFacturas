@@ -4,7 +4,6 @@ from Modelo.control_plagas import ControlPlagas
 from Modelo.control_fertilizantes import ControlFertilizantes
 from Modelo.antibiotico import Antibiotico
 
-
 cliente1 = Cliente("Ana García", "123456789")
 
 plaguicida = ControlPlagas("Insecticida X", 50, "ICA-123", 15, 7)
@@ -18,4 +17,4 @@ factura1.agregarProducto(antibiotico)
 
 cliente1.agregarFactura(factura1)
 
-print("breakpoint") 
+print("breakpoint")
