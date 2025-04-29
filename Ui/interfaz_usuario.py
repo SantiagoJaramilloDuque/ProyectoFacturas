@@ -17,7 +17,7 @@ class InterfazUsuario:
         print("\nProductos disponibles:")
         for i, producto in enumerate(self.productosDisponibles, 1):
             print(f"{i}. {producto.nombre} - ${producto.valor}")
-        
+
     def agregarProductoaFactura(self, factura):
         self.mostrarProductos()
         try:
@@ -29,7 +29,7 @@ class InterfazUsuario:
                 print("\nSelección inválida.")
         except ValueError:
             print("\nPor favor ingrese un número válido.")
-    
+
     def crearFactura(self, cliente):
         factura = Factura(cliente)
         while True:
@@ -41,7 +41,7 @@ class InterfazUsuario:
         cliente.agregarFactura(factura)
         print("\nFactura creada y añadida al historial del cliente.\n")
         input("Presione Enter para continuar...")
-    
+
     def crearCliente(self):
         nombre = input("\nIngrese el nombre del cliente: ")
         cedula = input("Ingrese la cédula del cliente: ")
@@ -55,6 +55,14 @@ class InterfazUsuario:
         print(f"\nHistorial de compras de {cliente.nombre}:")
         for factura in cliente.historialCompras:
             factura.mostrarFactura()
+
+    def buscar_por_cedula(self, mensaje="Ingrese la cédula del cliente: "):
+        cedulaCliente = input(f"\n{mensaje}")
+        cliente = self.clientes.get(cedulaCliente)
+        if not cliente:
+            print("\nCliente no encontrado.")
+            input("Presione Enter para continuar...")
+        return cliente
 
     def mostrarMenu(self):
         while True:
@@ -71,30 +79,20 @@ class InterfazUsuario:
                 if opcion == 1:
                     self.crearCliente()
                 elif opcion == 2:
-                    cedulaCliente = input("\nIngrese la cédula del cliente: ")
-                    if cedulaCliente in self.clientes:
-                        cliente = self.clientes[cedulaCliente]
+                    cliente = self.buscar_por_cedula()
+                    if cliente:
                         self.crearFactura(cliente)
-                    else:
-                        print("\nCliente no encontrado.")
-                        input("Presione Enter para continuar...")
                 elif opcion == 3:
-                    cedulaCliente = input("\nIngrese la cédula del cliente: ")
-                    if cedulaCliente in self.clientes:
-                        cliente = self.clientes[cedulaCliente]
+                    cliente = self.buscar_por_cedula()
+                    if cliente:
                         self.verHistorialCompras(cliente)
                         input("\nPresione Enter para continuar...")
-                    else:
-                        print("\nCliente no encontrado.")
                 elif opcion == 4:
-                    cedulaCliente = input("\nIngrese la cédula del cliente a eliminar: ")
-                    if cedulaCliente in self.clientes:
-                        del self.clientes[cedulaCliente]
+                    cliente = self.buscar_por_cedula("Ingrese la cédula del cliente a eliminar: ")
+                    if cliente:
+                        del self.clientes[cliente.cedula]
                         print("Cliente eliminado exitosamente.")
-                    else:
-                        print("Cliente no encontrado.")
-                        
-                    input("\nPresione Enter para continuar...")
+                        input("\nPresione Enter para continuar...")
                 elif opcion == 5:
                     self.mostrarProductos()
                 elif opcion == 6:
