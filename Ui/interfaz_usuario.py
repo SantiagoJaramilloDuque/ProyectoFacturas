@@ -1,8 +1,8 @@
 from Modelo.control_fertilizantes import ControlFertilizantes
 from Modelo.control_plagas import ControlPlagas
 from Modelo.antibiotico import Antibiotico
-from Modelo.cliente import Cliente
-from Modelo.factura import Factura
+
+from Crud import cliente_crud, factura_crud, producto_crud
 
 class InterfazUsuario:
     def __init__(self):
@@ -15,54 +15,38 @@ class InterfazUsuario:
 
     def mostrarProductos(self):
         print("\nProductos disponibles:")
-        for i, producto in enumerate(self.productosDisponibles, 1):
+        for i, producto in enumerate(producto_crud.listar_productos(self.productosDisponibles), 1):
             print(f"{i}. {producto.nombre} - ${producto.valor}")
 
-    def agregarProductoaFactura(self, factura):
-        self.mostrarProductos()
-        try:
-            seleccion = int(input("\nSeleccione el número del producto a agregar: "))
-            if 1 <= seleccion <= len(self.productosDisponibles):
-                factura.agregarProducto(self.productosDisponibles[seleccion - 1])
-                print(f"\nProducto '{self.productosDisponibles[seleccion - 1].nombre}' agregado a la factura.")
-            else:
-                print("\nSelección inválida.")
-        except ValueError:
-            print("\nPor favor ingrese un número válido.")
-
-    def crearFactura(self, cliente):
-        factura = Factura(cliente)
-        while True:
-            self.agregarProductoaFactura(factura)
-            continuar = input("¿Desea agregar otro producto? (s/n): ")
-            if continuar.lower() != 's':
-                break
-        factura.mostrarFactura()
-        cliente.agregarFactura(factura)
-        print("\nFactura creada y añadida al historial del cliente.\n")
-        input("Presione Enter para continuar...")
-
-    def crearCliente(self):
-        nombre = input("\nIngrese el nombre del cliente: ")
-        cedula = input("Ingrese la cédula del cliente: ")
-        cliente = Cliente(nombre, cedula)
-        self.clientes[cedula] = cliente
-        print(f"\nCliente '{nombre}' creado exitosamente.\n")
-        input("Presione Enter para continuar...")
-        return cliente
-
-    def verHistorialCompras(self, cliente):
-        print(f"\nHistorial de compras de {cliente.nombre}:")
-        for factura in cliente.historialCompras:
-            factura.mostrarFactura()
-
     def buscar_por_cedula(self, mensaje="Ingrese la cédula del cliente: "):
-        cedulaCliente = input(f"\n{mensaje}")
-        cliente = self.clientes.get(cedulaCliente)
+        cedula = input(f"\n{mensaje}")
+        cliente = cliente_crud.buscar_cliente(self.clientes, cedula)
         if not cliente:
             print("\nCliente no encontrado.")
             input("Presione Enter para continuar...")
         return cliente
+
+    def crearFactura(self, cliente):
+        factura = factura_crud.crear_factura(cliente)
+        while True:
+            self.mostrarProductos()
+            try:
+                seleccion = int(input("\nSeleccione el número del producto a agregar: ")) - 1
+                producto = producto_crud.obtener_producto_por_indice(self.productosDisponibles, seleccion)
+                if producto:
+                    factura_crud.agregar_producto_a_factura(factura, producto)
+                    print(f"\nProducto '{producto.nombre}' agregado a la factura.")
+                else:
+                    print("\nSelección inválida.")
+            except ValueError:
+                print("\nPor favor ingrese un número válido.")
+            
+            continuar = input("¿Desea agregar otro producto? (s/n): ")
+            if continuar.lower() != 's':
+                break
+
+        factura_crud.mostrar_factura(factura)
+        input("Presione Enter para continuar...")
 
     def mostrarMenu(self):
         while True:
@@ -77,33 +61,46 @@ class InterfazUsuario:
             try:
                 opcion = int(input("Seleccione una opción: "))
                 if opcion == 1:
-                    self.crearCliente()
+                    nombre = input("\nIngrese el nombre del cliente: ")
+                    cedula = input("Ingrese la cédula del cliente: ")
+                    cliente_crud.crear_cliente(self.clientes, nombre, cedula)
+                    print(f"\nCliente '{nombre}' creado exitosamente.\n")
+                    input("Presione Enter para continuar...")
+
                 elif opcion == 2:
                     cliente = self.buscar_por_cedula()
                     if cliente:
                         self.crearFactura(cliente)
+
                 elif opcion == 3:
                     cliente = self.buscar_por_cedula()
                     if cliente:
-                        self.verHistorialCompras(cliente)
+                        print(f"\nHistorial de compras de {cliente.nombre}:")
+                        for factura in factura_crud.listar_facturas(cliente):
+                            factura_crud.mostrar_factura(factura)
                         input("\nPresione Enter para continuar...")
+
                 elif opcion == 4:
                     cliente = self.buscar_por_cedula("Ingrese la cédula del cliente a eliminar: ")
                     if cliente:
-                        del self.clientes[cliente.cedula]
+                        cliente_crud.eliminar_cliente(self.clientes, cliente.cedula)
                         print("Cliente eliminado exitosamente.")
                         input("\nPresione Enter para continuar...")
+
                 elif opcion == 5:
                     self.mostrarProductos()
+
                 elif opcion == 6:
                     print("\nLista de Clientes:")
-                    for cliente in self.clientes.values():
+                    for cliente in cliente_crud.listar_clientes(self.clientes):
                         print(f"- {cliente.nombre} (Cédula: {cliente.cedula})")
                     input("\nPresione Enter para continuar...")
+
                 elif opcion == 7:
-                    print("¡Gracias por usar el sistema! Hasta luego.")
                     break
+
                 else:
                     print("Opción no válida. Intente nuevamente.")
+
             except ValueError:
                 print("Por favor ingrese un número válido.")
